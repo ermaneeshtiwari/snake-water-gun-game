@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Snake Water Gun</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Snake Water Gun</h1>
+    <p class="rules">Choose one: <strong>S</strong> (Snake), <strong>W</strong> (Water), <strong>G</strong> (Gun)</p>
+
+    <div class="choices">
+      <button data-choice="S">Snake (S)</button>
+      <button data-choice="W">Water (W)</button>
+      <button data-choice="G">Gun (G)</button>
+    </div>
+
+    <div class="result">
+      <p id="status">Make a choice to play.</p>
+      <p id="detail"></p>
+    </div>
+
+    <button id="reset" class="small">Reset</button>
+
+    <footer>
+      <p>Simple single-round game — static web version.</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
