@@ -9,5 +9,5 @@ h1{margin:0 0 8px;font-size:1.6rem}
 .result{min-height:48px}
 #status{font-weight:700;margin:0}
 #detail{margin:6px 0 0;color:#333}
-.small{margin-top:12px;padding:8px 12px;border-radius:6px;border:none;background:#eef2ff;color:#1e3a8a;cursor:pointer}
+.small{display:inline-block;margin-top:12px;padding:8px 12px;border-radius:6px;border:none;background:#eef2ff;color:#1e3a8a;cursor:pointer;text-decoration:none}
 .footer{margin-top:14px;color:#666;font-size:0.9rem}

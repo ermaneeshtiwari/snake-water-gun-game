@@ -11,24 +11,22 @@
     <h1>Snake Water Gun</h1>
     <p class="rules">Choose one: <strong>S</strong> (Snake), <strong>W</strong> (Water), <strong>G</strong> (Gun)</p>
 
-    <div class="choices">
-      <button data-choice="S">Snake (S)</button>
-      <button data-choice="W">Water (W)</button>
-      <button data-choice="G">Gun (G)</button>
-    </div>
+    <form class="choices" action="/api/play" method="get">
+      <button name="choice" value="S" type="submit">Snake (S)</button>
+      <button name="choice" value="W" type="submit">Water (W)</button>
+      <button name="choice" value="G" type="submit">Gun (G)</button>
+    </form>
 
     <div class="result">
       <p id="status">Make a choice to play.</p>
       <p id="detail"></p>
     </div>
 
-    <button id="reset" class="small">Reset</button>
+    <a href="/" class="small">Reset</a>
 
     <footer>
-      <p>Simple single-round game — static web version.</p>
+      <p>Simple single-round game - powered by Python.</p>
     </footer>
   </main>
-
-  <script src="script.js"></script>
 </body>
 </html>

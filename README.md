@@ -1,13 +1,13 @@
 # Snake Water Gun Game
 
-A simple command-line Python game implementing the classic Snake–Water–Gun rules.
+A simple Python game implementing the classic Snake-Water-Gun rules.
 
 Rules
 - Snake drinks Water (Snake wins)
 - Water douses Gun (Water wins)
 - Gun kills Snake (Gun wins)
 
-Usage
+Terminal Usage
 
 Run the game from the terminal:
 
@@ -16,19 +16,23 @@ python snakeWaterGunGame.py
 ```
 
 Input choices
-- `S` — Snake
-- `W` — Water
-- `G` — Gun
+- `S` - Snake
+- `W` - Water
+- `G` - Gun
+
+Browser Usage
+
+The browser version submits the player's choice to a Python Vercel function at `/api/play`.
 
 Example
 
-```
+```text
 Enter your choice (Snake: S, Water: W, Gun: G): S
-You win!
+You chose Snake. Computer chose Water. You win!
 ```
 
 Notes
-- This is an interactive, single-round game intended for local use.
+- This is a single-round game for both terminal and browser use.
 
 Contributing
 - Feel free to open issues or submit pull requests to improve the game.
