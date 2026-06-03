@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>JobFind AI – Smart Job Portal</title>
+  <link rel="stylesheet" href="/job_portal.css"/>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="logo">JobFind<span>AI</span></div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Job title, skills, or company…" onkeydown="if(event.key==='Enter')searchJobs()"/>
+    <select id="typeFilter" onchange="searchJobs()">
+      <option value="">All Types</option>
+      <option value="full-time">Full-time</option>
+      <option value="contract">Contract</option>
+      <option value="permanent">Permanent</option>
+    </select>
+    <button onclick="searchJobs()">Search</button>
+  </div>
+  <div class="header-badge">Powered by Indeed + AI</div>
+</header>
+
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="profile-card">
+      <div class="profile-avatar" id="avatarInitials">MT</div>
+      <h3 id="profileName">Maneesh Tiwari</h3>
+      <p class="profile-title" id="profileTitle">Senior Full Stack Developer</p>
+      <div class="profile-stats">
+        <span id="expStat">10+ yrs</span>
+        <span>Remote ✓</span>
+      </div>
+      <div class="skills-cloud" id="skillsCloud"></div>
+    </div>
+
+    <div class="filter-section">
+      <h4>Date Posted</h4>
+      <label><input type="radio" name="timeFilter" value="" checked onchange="searchJobs()"> All time</label>
+      <label><input type="radio" name="timeFilter" value="24" onchange="searchJobs()"> Last 24 hours</label>
+      <label><input type="radio" name="timeFilter" value="72" onchange="searchJobs()"> Last 3 days</label>
+      <label><input type="radio" name="timeFilter" value="168" onchange="searchJobs()"> Last 7 days</label>
+    </div>
+
+    <div class="source-badge">
+      <p>Jobs sourced from</p>
+      <strong>Indeed Global</strong>
+    </div>
+  </aside>
+
+  <!-- ── Job List ── -->
+  <main class="job-list" id="jobList">
+    <div class="job-list-header">
+      <span id="jobCount">Loading…</span>
+      <span class="loading-spinner" id="spinner"></span>
+    </div>
+  </main>
+
+  <!-- ── Job Detail ── -->
+  <section class="job-detail" id="jobDetail">
+    <div class="empty-state">
+      <div class="empty-icon">🎯</div>
+      <h3>Select a job to get started</h3>
+      <p>Click any job to see the full description, your AI match score, and generate a tailored cover letter.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ── Cover Letter Modal ── -->
+<div class="modal" id="coverModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>✍️ AI-Generated Cover Letter</h3>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="coverBody">
+      <div class="loading">Generating your personalised cover letter…</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-copy" onclick="copyCover()">Copy to Clipboard</button>
+      <button class="btn-close" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allJobs = [];
+let currentJob = null;
+
+/* ── Bootstrap ── */
+async function init() {
+  const [rRes, jRes] = await Promise.all([fetch('/api/resume'), fetch('/api/jobs')]);
+  const resume = await rRes.json();
+  const data   = await jRes.json();
+  allJobs = data.jobs;
+
+  const initials = resume.name.split(' ').map(w => w[0]).join('').toUpperCase();
+  document.getElementById('avatarInitials').textContent = initials;
+  document.getElementById('profileName').textContent = resume.name;
+
+  const cloud = document.getElementById('skillsCloud');
+  cloud.innerHTML = resume.skills.slice(0, 14).map(s =>
+    `<span class="skill-tag">${s}</span>`).join('');
+
+  renderJobs(allJobs);
+}
+
+/* ── Search / Filter ── */
+async function searchJobs() {
+  const q      = document.getElementById('searchInput').value.trim();
+  const type   = document.getElementById('typeFilter').value;
+  const hours  = document.querySelector('input[name="timeFilter"]:checked').value;
+
+  document.getElementById('spinner').style.display = 'inline-block';
+
+  let url = `/api/jobs?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`;
+  if (hours) url += `&hours=${hours}`;
+
+  const res  = await fetch(url);
+  const data = await res.json();
+  allJobs = data.jobs;
+  renderJobs(allJobs);
+
+  document.getElementById('spinner').style.display = 'none';
+}
+
+/* ── Render job cards ── */
+function renderJobs(jobs) {
+  const list = document.getElementById('jobList');
+  document.getElementById('jobCount').textContent =
+    `${jobs.length} job${jobs.length !== 1 ? 's' : ''} found`;
+
+  if (!jobs.length) {
+    list.innerHTML = `
+      <div class="job-list-header"><span>0 jobs found</span></div>
+      <div class="no-jobs"><p>No jobs match your current filters.<br>Try adjusting the search or date range.</p></div>`;
+    return;
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const cards = jobs.map(job => {
+    const isNew = job.posted === today;
+    const typeCls = job.type.toLowerCase().includes('contract') ? 'badge-yellow'
+                  : job.type.toLowerCase().includes('permanent') ? 'badge-green'
+                  : 'badge-green';
+    return `
+      <div class="job-card" id="card-${job.id}" onclick="selectJob('${job.id}')">
+        <div class="job-card-header">
+          <div>
+            <div class="job-title">${job.title}</div>
+            <div class="job-company">${job.company}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            <span class="badge ${typeCls}">${job.type}</span>
+            ${isNew ? '<span class="badge badge-new">NEW</span>' : ''}
+          </div>
+        </div>
+        <div class="job-meta">
+          <span>📍 ${job.location}</span>
+          <span>📅 ${fmtDate(job.posted)}</span>
+          ${job.salary !== 'N/A' ? `<span>💰 ${job.salary}</span>` : ''}
+        </div>
+        <div class="job-snippet">${job.description}</div>
+      </div>`;
+  }).join('');
+
+  list.innerHTML = `<div class="job-list-header"><span id="jobCount">${jobs.length} job${jobs.length !== 1 ? 's' : ''} found</span></div>` + cards;
+}
+
+/* ── Select and analyse a job ── */
+async function selectJob(id) {
+  currentJob = allJobs.find(j => j.id === id);
+  if (!currentJob) return;
+
+  document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
+  document.getElementById(`card-${id}`)?.classList.add('active');
+
+  document.getElementById('jobDetail').innerHTML = '<div class="loading-detail">Analysing match…</div>';
+
+  const res   = await fetch('/api/match', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_description: currentJob.description})
+  });
+  const match = await res.json();
+  document.getElementById('jobDetail').innerHTML = buildDetail(currentJob, match);
+}
+
+/* ── Build detail panel HTML ── */
+function buildDetail(job, match) {
+  const color = match.score >= 70 ? '#10b981' : match.score >= 40 ? '#f59e0b' : '#ef4444';
+  const label = match.score >= 70 ? 'Great Match' : match.score >= 40 ? 'Good Match' : 'Partial Match';
+  const dash  = 264;
+  const fill  = (match.score / 100) * dash;
+
+  const matched = match.matched_skills.map(s => `<span class="pill pill-match">${s}</span>`).join('');
+  const missing = match.missing_skills.map(s => `<span class="pill pill-miss">${s}</span>`).join('');
+
+  return `
+    <div class="detail-header">
+      <div>
+        <h2>${job.title}</h2>
+        <p class="detail-company">${job.company} &middot; ${job.location}</p>
+        <p class="detail-meta">
+          ${job.salary !== 'N/A' ? `<strong>${job.salary}</strong> &middot; ` : ''}
+          ${job.type} &middot; Posted ${fmtDate(job.posted)}
+        </p>
+      </div>
+      <a href="${job.url}" target="_blank" rel="noopener" class="apply-btn">Apply Now →</a>
+    </div>
+
+    <div class="match-card">
+      <div class="score-ring">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="10"
+            stroke-dasharray="${fill.toFixed(1)} ${dash}"
+            stroke-linecap="round" transform="rotate(-90 50 50)"/>
+        </svg>
+        <div class="score-text">
+          <span class="score-number">${match.score}%</span>
+          <span class="score-label">${label}</span>
+        </div>
+      </div>
+      <div class="match-details">
+        ${matched ? `<div><h4>✅ Matched Skills</h4><div class="pill-list">${matched}</div></div>` : ''}
+        ${missing ? `<div><h4>📚 Skills to Highlight</h4><div class="pill-list">${missing}</div></div>` : ''}
+      </div>
+    </div>
+
+    <div class="detail-description">
+      <h3>Job Description</h3>
+      <p>${job.description}</p>
+    </div>
+
+    <button class="cover-letter-btn" onclick="openCoverLetter()">
+      ✨ Generate AI Cover Letter
+    </button>`;
+}
+
+/* ── Cover Letter ── */
+async function openCoverLetter() {
+  if (!currentJob) return;
+  document.getElementById('coverModal').classList.add('visible');
+  document.getElementById('coverBody').innerHTML = '<div class="loading">✨ Writing your personalised cover letter…</div>';
+
+  const res  = await fetch('/api/cover-letter', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      job_title: currentJob.title,
+      company: currentJob.company,
+      job_description: currentJob.description
+    })
+  });
+  const data = await res.json();
+
+  document.getElementById('coverBody').innerHTML = data.success
+    ? `<pre class="cover-letter-text">${data.cover_letter}</pre>`
+    : `<div class="error-msg">⚠️ ${data.error}</div>`;
+}
+
+function copyCover() {
+  const txt = document.querySelector('.cover-letter-text')?.textContent;
+  if (txt) { navigator.clipboard.writeText(txt); alert('Copied to clipboard!'); }
+}
+function closeModal() { document.getElementById('coverModal').classList.remove('visible'); }
+
+/* ── Helpers ── */
+function fmtDate(ds) {
+  const d    = new Date(ds);
+  const now  = new Date();
+  const diff = Math.floor((now - d) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  if (diff < 30)  return `${diff}d ago`;
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+
+init();
+</script>
+</body>
+</html>
