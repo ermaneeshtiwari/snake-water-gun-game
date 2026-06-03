@@ -24,6 +24,20 @@ Browser Usage
 
 The browser version submits the player's choice to a Python Vercel function at `/api/play`.
 
+Local Browser Usage
+
+Run the local Python web server:
+
+```bash
+python server.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8000
+```
+
 Example
 
 ```text
