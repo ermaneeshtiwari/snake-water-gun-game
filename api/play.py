@@ -35,8 +35,6 @@ body {
 }
 h1 { color: #e94560; font-size: 1.8rem; margin-bottom: 0.3rem; }
 .subtitle { color: #666; font-size: 0.85rem; margin-bottom: 1.8rem; }
-
-/* name form */
 .name-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 .name-input {
   background: #1a2a50;
@@ -60,8 +58,6 @@ h1 { color: #e94560; font-size: 1.8rem; margin-bottom: 0.3rem; }
   transition: background 0.2s;
 }
 .btn-primary:hover { background: #c73652; }
-
-/* scoreboard */
 .scoreboard {
   display: flex;
   justify-content: center;
@@ -83,8 +79,6 @@ h1 { color: #e94560; font-size: 1.8rem; margin-bottom: 0.3rem; }
 .score-rnd  .score-val { color: #64b5f6; }
 .player-tag { color: #aaa; font-size: 0.9rem; margin-bottom: 1rem; }
 .player-tag strong { color: #e94560; }
-
-/* choices */
 .choices { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .btn {
   background: #1a2a50;
@@ -99,8 +93,6 @@ h1 { color: #e94560; font-size: 1.8rem; margin-bottom: 0.3rem; }
 }
 .btn span.lbl { font-size: 0.75rem; color: #aaa; }
 .btn:hover { background: #e94560; border-color: #e94560; transform: translateY(-3px); }
-
-/* battle */
 .battle { display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 1rem 0; }
 .fighter { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; }
 .fighter .emoji { font-size: 4rem; animation: pop 0.5s ease; }
@@ -112,8 +104,6 @@ h1 { color: #e94560; font-size: 1.8rem; margin-bottom: 0.3rem; }
   70%  { transform: scale(1.25); }
   100% { transform: scale(1); opacity: 1; }
 }
-
-/* result banner */
 .result-banner {
   border-radius: 12px;
   padding: 0.8rem 1.2rem;
@@ -122,7 +112,25 @@ h1 { color: #e94560; font-size: 1.8rem; margin-bottom: 0.3rem; }
 .result-label { font-size: 1.3rem; font-weight: bold; margin-bottom: 0.3rem; }
 .reason { font-size: 0.9rem; color: #ccc; }
 
-/* action buttons */
+/* countdown bar */
+.countdown-wrap { margin: 0.8rem 0 0.4rem; }
+.countdown-bar-bg {
+  background: #0f1c36;
+  border-radius: 99px;
+  height: 6px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+.countdown-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: #64b5f6;
+  width: 100%;
+  animation: shrink 2s linear forwards;
+}
+@keyframes shrink { from { width: 100%; } to { width: 0%; } }
+.countdown-txt { font-size: 0.8rem; color: #666; }
+
 .actions { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin-top: 0.5rem; }
 .btn-sm {
   background: #1a2a50;
@@ -134,12 +142,11 @@ h1 { color: #e94560; font-size: 1.8rem; margin-bottom: 0.3rem; }
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s;
+  display: inline-block;
 }
 .btn-sm:hover { background: #e94560; border-color: #e94560; }
 .btn-end { border-color: #f0c040; color: #f0c040; }
-.btn-end:hover { background: #f0c040; color: #000; }
-
-/* final summary */
+.btn-end:hover { background: #f0c040 !important; color: #000 !important; }
 .final-wrap { margin-top: 1rem; }
 .final-title { font-size: 1.3rem; color: #f0c040; margin-bottom: 1rem; }
 .final-grid { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
@@ -167,10 +174,10 @@ footer { margin-top: 1.5rem; color: #333; font-size: 0.75rem; }
 def play_round(user):
     comp = random.choice(list(NAME.keys()))
     if user == comp:
-        outcome, label, color = "tie",  "Tie! \U0001f91d",          "#f0c040"
+        outcome, label, color = "tie",  "Tie! \U0001f91d",            "#f0c040"
         reason = "Dono ne same choice kiya!"
     elif (user, comp) in WINS:
-        outcome, label, color = "win",  "Aap Jeete! \U0001f389",   "#4caf50"
+        outcome, label, color = "win",  "Aap Jeete! \U0001f389",     "#4caf50"
         reason = REASON[(user, comp)]
     else:
         outcome, label, color = "lose", "Computer Jeeta! \U0001f916", "#e94560"
@@ -178,7 +185,7 @@ def play_round(user):
     return comp, outcome, label, color, reason
 
 
-def page(body, title="Snake Water Gun"):
+def page(body, head_extra="", title="Snake Water Gun"):
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -186,6 +193,7 @@ def page(body, title="Snake Water Gun"):
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{title}</title>
   <style>{CSS}</style>
+  {head_extra}
 </head>
 <body><div class="card">{body}</div></body>
 </html>"""
@@ -213,20 +221,16 @@ def choice_screen(name, wins, losses, ties):
     <p class="player-tag">Namaste, <strong>{escape(name)}</strong>! \U0001f44b</p>
     <div class="scoreboard">
       <div class="score-box score-rnd">
-        <div class="score-val">{rounds}</div>
-        <div class="score-lbl">Rounds</div>
+        <div class="score-val">{rounds}</div><div class="score-lbl">Rounds</div>
       </div>
       <div class="score-box score-win">
-        <div class="score-val">{wins}</div>
-        <div class="score-lbl">Jeete</div>
+        <div class="score-val">{wins}</div><div class="score-lbl">Jeete</div>
       </div>
       <div class="score-box score-lose">
-        <div class="score-val">{losses}</div>
-        <div class="score-lbl">Haare</div>
+        <div class="score-val">{losses}</div><div class="score-lbl">Haare</div>
       </div>
       <div class="score-box score-tie">
-        <div class="score-val">{ties}</div>
-        <div class="score-lbl">Tie</div>
+        <div class="score-val">{ties}</div><div class="score-lbl">Tie</div>
       </div>
     </div>
     <p class="subtitle">Apna choice karo:</p>
@@ -249,26 +253,33 @@ def choice_screen(name, wins, losses, ties):
 
 def result_screen(name, user, comp, outcome, label, color, reason, wins, losses, ties):
     rounds = wins + losses + ties
-    params = urlencode({"name": name, "wins": wins, "losses": losses, "ties": ties})
+    next_url = "/api/play?" + urlencode({"name": name, "wins": wins, "losses": losses, "ties": ties})
+    end_url  = "/api/play?" + urlencode({"name": name, "wins": wins, "losses": losses, "ties": ties, "end": 1})
+
+    # Auto-redirect after 2 seconds; clicking either button cancels it
+    head_extra = f"""
+    <script>
+      var timer = setTimeout(function() {{
+        window.location.href = "{next_url}";
+      }}, 2000);
+      function cancel() {{ clearTimeout(timer); }}
+    </script>"""
+
     body = f"""
     <h1>\U0001f40d Snake Water Gun \U0001f52b</h1>
     <p class="player-tag">Round <strong>{rounds}</strong> &mdash; <strong style="color:#e94560">{escape(name)}</strong></p>
     <div class="scoreboard">
       <div class="score-box score-rnd">
-        <div class="score-val">{rounds}</div>
-        <div class="score-lbl">Rounds</div>
+        <div class="score-val">{rounds}</div><div class="score-lbl">Rounds</div>
       </div>
       <div class="score-box score-win">
-        <div class="score-val">{wins}</div>
-        <div class="score-lbl">Jeete</div>
+        <div class="score-val">{wins}</div><div class="score-lbl">Jeete</div>
       </div>
       <div class="score-box score-lose">
-        <div class="score-val">{losses}</div>
-        <div class="score-lbl">Haare</div>
+        <div class="score-val">{losses}</div><div class="score-lbl">Haare</div>
       </div>
       <div class="score-box score-tie">
-        <div class="score-val">{ties}</div>
-        <div class="score-lbl">Tie</div>
+        <div class="score-val">{ties}</div><div class="score-lbl">Tie</div>
       </div>
     </div>
     <div class="battle">
@@ -288,64 +299,48 @@ def result_screen(name, user, comp, outcome, label, color, reason, wins, losses,
       <div class="result-label" style="color:{color}">{label}</div>
       <div class="reason">{reason}</div>
     </div>
+    <div class="countdown-wrap">
+      <div class="countdown-bar-bg"><div class="countdown-bar"></div></div>
+      <div class="countdown-txt">2 second mein agli round shuru hogi...</div>
+    </div>
     <div class="actions">
-      <a class="btn-sm" href="/api/play?{params}">\U0001f504 Agli Round</a>
-      <a class="btn-sm btn-end" href="/api/play?{params}&end=1">\U0001f3c1 Game Khatam Karo</a>
+      <a class="btn-sm" href="{next_url}" onclick="cancel()">\U0001f504 Abhi Khelo</a>
+      <a class="btn-sm btn-end" href="{end_url}" onclick="cancel()">\U0001f3c1 Game Khatam Karo</a>
     </div>
     <footer>Snake beats Water &bull; Water beats Gun &bull; Gun beats Snake</footer>
     """
-    return page(body, f"Round {rounds} - {name}")
+    return page(body, head_extra, f"Round {rounds} - {name}")
 
 
 def final_screen(name, wins, losses, ties):
     rounds = wins + losses + ties
     if rounds == 0:
-        verdict = "Koi round nahi khela!"
-        vcolor = "#888"
+        verdict, vcolor = "Koi round nahi khela!", "#888"
     elif wins > losses:
-        verdict = f"\U0001f3c6 {escape(name)} ne jeeta! Bahut badhiya!"
-        vcolor = "#4caf50"
+        verdict, vcolor = f"\U0001f3c6 {escape(name)} ne jeeta! Bahut badhiya!", "#4caf50"
     elif losses > wins:
-        verdict = f"\U0001f916 Computer ne jeeta! Agli baar try karo!"
-        vcolor = "#e94560"
+        verdict, vcolor = "\U0001f916 Computer ne jeeta! Agli baar try karo!", "#e94560"
     else:
-        verdict = "\U0001f91d Barabar raha! Koi nahi jeeta!"
-        vcolor = "#f0c040"
+        verdict, vcolor = "\U0001f91d Barabar raha! Koi nahi jeeta!", "#f0c040"
 
     win_pct = round(wins / rounds * 100) if rounds else 0
-
     body = f"""
     <h1>\U0001f3c1 Game Khatam!</h1>
     <p class="subtitle" style="color:#f0c040; font-size:1rem; margin-bottom:1.2rem;">{escape(name)} ka Final Score</p>
     <div class="final-wrap">
       <div class="final-grid">
-        <div class="final-box">
-          <div class="fval" style="color:#64b5f6">{rounds}</div>
-          <div class="flbl">Total Rounds</div>
-        </div>
-        <div class="final-box">
-          <div class="fval" style="color:#4caf50">{wins}</div>
-          <div class="flbl">Jeete</div>
-        </div>
-        <div class="final-box">
-          <div class="fval" style="color:#e94560">{losses}</div>
-          <div class="flbl">Haare</div>
-        </div>
-        <div class="final-box">
-          <div class="fval" style="color:#f0c040">{ties}</div>
-          <div class="flbl">Tie</div>
-        </div>
-        <div class="final-box">
-          <div class="fval" style="color:#ab47bc">{win_pct}%</div>
-          <div class="flbl">Win Rate</div>
-        </div>
+        <div class="final-box"><div class="fval" style="color:#64b5f6">{rounds}</div><div class="flbl">Total Rounds</div></div>
+        <div class="final-box"><div class="fval" style="color:#4caf50">{wins}</div><div class="flbl">Jeete</div></div>
+        <div class="final-box"><div class="fval" style="color:#e94560">{losses}</div><div class="flbl">Haare</div></div>
+        <div class="final-box"><div class="fval" style="color:#f0c040">{ties}</div><div class="flbl">Tie</div></div>
+        <div class="final-box"><div class="fval" style="color:#ab47bc">{win_pct}%</div><div class="flbl">Win Rate</div></div>
       </div>
       <div class="verdict" style="color:{vcolor}">{verdict}</div>
       <a class="new-game-btn" href="/api/play">\U0001f504 Naya Game Shuru Karo</a>
     </div>
     <footer style="margin-top:1.5rem">Snake beats Water &bull; Water beats Gun &bull; Gun beats Snake</footer>
     """
-    return page(body, f"Final Score - {name}")
+    return page(body, title=f"Final Score - {name}")
 
 
 class handler(BaseHTTPRequestHandler):
@@ -366,7 +361,7 @@ class handler(BaseHTTPRequestHandler):
             html = final_screen(name, wins, losses, ties)
         elif choice in NAME:
             comp, outcome, label, color, reason = play_round(choice)
-            if outcome == "win":  wins   += 1
+            if outcome == "win":    wins   += 1
             elif outcome == "lose": losses += 1
             else:                   ties   += 1
             html = result_screen(name, choice, comp, outcome,
