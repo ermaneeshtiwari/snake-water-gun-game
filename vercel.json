@@ -1,7 +1,3 @@
 {
-  "version": 2,
-  "routes": [
-    { "src": "/api/play", "dest": "/api/play.py" },
-    { "src": "/(.*)", "dest": "/$1" }
-  ]
+  "version": 2
 }
