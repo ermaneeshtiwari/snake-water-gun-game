@@ -1,5 +1,8 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "api/play.py", "use": "@vercel/python" }
+  ],
   "routes": [
     { "src": "/(.*)", "dest": "/api/play.py" }
   ]
