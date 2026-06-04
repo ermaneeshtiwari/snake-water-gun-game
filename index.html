@@ -4,57 +4,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Snake Water Gun</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <main class="container">
     <h1>Snake Water Gun</h1>
     <p class="rules">Choose one: <strong>S</strong> (Snake), <strong>W</strong> (Water), <strong>G</strong> (Gun)</p>
 
-    <div class="choices">
-      <button onclick="play('S')">Snake (S)</button>
-      <button onclick="play('W')">Water (W)</button>
-      <button onclick="play('G')">Gun (G)</button>
-    </div>
+    <form class="choices" action="/api/play" method="get">
+      <button name="choice" value="S" type="submit">Snake (S)</button>
+      <button name="choice" value="W" type="submit">Water (W)</button>
+      <button name="choice" value="G" type="submit">Gun (G)</button>
+    </form>
 
     <div class="result">
       <p id="status">Make a choice to play.</p>
     </div>
 
-    <button class="small" onclick="reset()">Reset</button>
+    <a href="/" class="small">Reset</a>
 
     <footer>
-      <p>Simple single-round game - powered by JavaScript.</p>
+      <p>Simple single-round game - powered by Python.</p>
     </footer>
   </main>
-
-  <script>
-    const names = { S: 'Snake', W: 'Water', G: 'Gun' };
-    const choices = ['S', 'W', 'G'];
-
-    function play(userChoice) {
-      const computerChoice = choices[Math.floor(Math.random() * 3)];
-      let result;
-
-      if (userChoice === computerChoice) {
-        result = "It's a tie!";
-      } else if (
-        (userChoice === 'S' && computerChoice === 'W') ||
-        (userChoice === 'W' && computerChoice === 'G') ||
-        (userChoice === 'G' && computerChoice === 'S')
-      ) {
-        result = 'You win!';
-      } else {
-        result = 'Computer wins!';
-      }
-
-      document.getElementById('status').textContent =
-        'You chose ' + names[userChoice] + '. Computer chose ' + names[computerChoice] + '. ' + result;
-    }
-
-    function reset() {
-      document.getElementById('status').textContent = 'Make a choice to play.';
-    }
-  </script>
 </body>
 </html>
