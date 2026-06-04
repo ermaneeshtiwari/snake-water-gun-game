@@ -1,3 +1,11 @@
 {
-  "version": 2
+  "version": 2,
+  "builds": [
+    { "src": "api/play.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/api/play", "dest": "/api/play.py" },
+    { "src": "/style.css", "dest": "/style.css" },
+    { "src": "/", "dest": "/index.html" }
+  ]
 }
