@@ -45,6 +45,7 @@
       <label><input type="radio" name="timeFilter" value="24" onchange="searchJobs()"> Last 24 hours</label>
       <label><input type="radio" name="timeFilter" value="72" onchange="searchJobs()"> Last 3 days</label>
       <label><input type="radio" name="timeFilter" value="168" onchange="searchJobs()"> Last 7 days</label>
+      <label><input type="radio" name="timeFilter" value="240" onchange="searchJobs()"> Last 10 days</label>
     </div>
 
     <div class="source-badge">
@@ -75,7 +76,7 @@
 <div class="modal" id="coverModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3>✍️ AI-Generated Cover Letter</h3>
+      <h3 id="coverModalTitle">✍️ AI-Generated Cover Letter</h3>
       <button class="close-btn" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="coverBody">
@@ -83,6 +84,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-copy" onclick="copyCover()">Copy to Clipboard</button>
+      <a id="applyNowFooterBtn" class="apply-btn" target="_blank" rel="noopener" style="display:none;padding:8px 18px;font-size:.85rem;">Apply Now →</a>
       <button class="btn-close" onclick="closeModal()">Close</button>
     </div>
   </div>
@@ -239,30 +241,50 @@ function buildDetail(job, match) {
       <p>${job.description}</p>
     </div>
 
-    <button class="cover-letter-btn" onclick="openCoverLetter()">
-      ✨ Generate AI Cover Letter
-    </button>`;
+    <div style="display:flex;gap:10px;margin:8px 24px 24px;">
+      <button class="cover-letter-btn" style="margin:0;flex:1;" onclick="openCoverLetter()">
+        ✍️ Generate Cover Letter
+      </button>
+      <button class="quick-apply-btn" onclick="oneClickApply()">
+        ⚡ One-Click Apply
+      </button>
+    </div>`;
 }
 
 /* ── Cover Letter ── */
 async function openCoverLetter() {
   if (!currentJob) return;
   document.getElementById('coverModal').classList.add('visible');
+  document.getElementById('coverModalTitle').textContent = '✍️ AI-Generated Cover Letter';
+  document.getElementById('applyNowFooterBtn').style.display = 'none';
   document.getElementById('coverBody').innerHTML = '<div class="loading">✨ Writing your personalised cover letter…</div>';
-
   const res  = await fetch('/api/cover-letter', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      job_title: currentJob.title,
-      company: currentJob.company,
-      job_description: currentJob.description
-    })
+    body: JSON.stringify({job_title: currentJob.title, company: currentJob.company, job_description: currentJob.description})
   });
   const data = await res.json();
-
   document.getElementById('coverBody').innerHTML = data.success
     ? `<pre class="cover-letter-text">${data.cover_letter}</pre>`
+    : `<div class="error-msg">⚠️ ${data.error}</div>`;
+}
+
+async function oneClickApply() {
+  if (!currentJob) return;
+  document.getElementById('coverModal').classList.add('visible');
+  document.getElementById('coverModalTitle').textContent = '⚡ One-Click Apply';
+  document.getElementById('coverBody').innerHTML = '<div class="loading">✨ Generating your cover letter before applying…</div>';
+  const applyBtn = document.getElementById('applyNowFooterBtn');
+  applyBtn.style.display = 'inline-block';
+  applyBtn.href = currentJob.url;
+  const res  = await fetch('/api/cover-letter', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_title: currentJob.title, company: currentJob.company, job_description: currentJob.description})
+  });
+  const data = await res.json();
+  document.getElementById('coverBody').innerHTML = data.success
+    ? `<div style="background:#dcfce7;padding:10px 14px;border-radius:6px;font-size:.82rem;color:#166534;margin-bottom:12px;">✅ Cover letter ready! Copy it below, then click <strong>Apply Now</strong>.</div><pre class="cover-letter-text">${data.cover_letter}</pre>`
     : `<div class="error-msg">⚠️ ${data.error}</div>`;
 }
 
